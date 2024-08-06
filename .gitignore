@@ -5,6 +5,8 @@
 *.un~
 tests
 *.txt
+pipex-tester
+pipex_tester_42
 
 # Object files
 *.o

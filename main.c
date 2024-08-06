@@ -6,7 +6,7 @@
 /*   By: mpellegr <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/05 11:19:44 by mpellegr          #+#    #+#             */
-/*   Updated: 2024/08/05 16:19:47 by mpellegr         ###   ########.fr       */
+/*   Updated: 2024/08/06 16:27:13 by mpellegr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,12 @@ char	*find_path(char *cmd, char **envp)
 	i = 0;
 	while (ft_strnstr(envp[i], "PATH", 4) == 0)
 		i++;
-	paths = ft_split(envp[i], ':');
+	paths = ft_split(envp[i] + 5, ':');
+	if (!paths)
+	{
+		perror("split error\n");
+		exit(EXIT_FAILURE);
+	}
 	i = 0;
 	while (paths[i])
 	{
@@ -34,7 +39,7 @@ char	*find_path(char *cmd, char **envp)
 		free(path);
 		i++;
 	}
-	while (i-- >= 0)
+	while (i--)
 		free(paths[i]);
 	free(paths);
 	return (NULL);
@@ -48,32 +53,46 @@ void	ft_exec(char *cmd, char **envp)
 
 	i = -1;
 	cmd_arr = ft_split(cmd, ' ');
+	if (!cmd_arr)
+	{
+		perror("split error\n");
+		exit(EXIT_FAILURE);	
+	}
 	path = find_path(cmd_arr[0], envp);
 	if (!path)
 	{
 		while (cmd_arr[++i])
 			free(cmd_arr[i]);
 		free(cmd_arr);
+		exit(EXIT_FAILURE);
 	}
 	if (execve(path, cmd_arr, envp) == -1)
 	{
+		while (cmd_arr[++i])
+			free(cmd_arr[i]);
+		free(cmd_arr);
+		free(path);
 		perror("execve failure\n");
 		exit(EXIT_FAILURE);
 	}
+	free(path);
+	while (cmd_arr[++i])
+		free(cmd_arr[i]);
+	free(cmd_arr);
 }
 
 void	child_process(int *fd, char **argv, char **envp)
 {
-	int	file_1;
+	int	input_file;
 
 	close(fd[0]);
-	file_1 = open(argv[1], O_RDONLY, 0777);
-	if (file_1 == -1)
+	input_file = open(argv[1], O_RDONLY, 0777);
+	if (input_file == -1)
 	{
 		perror("error opening\n");
 		exit(EXIT_FAILURE);
 	}
-	if(dup2(file_1, 0) == -1) // file opened will be input/read
+	if(dup2(input_file, 0) == -1) // file opened will be input/read
 	{
 		perror("error duplicating file descriptor\n");
 		exit(EXIT_FAILURE);
@@ -88,26 +107,26 @@ void	child_process(int *fd, char **argv, char **envp)
 
 void	parent_process(int *fd, char **argv, char **envp)
 {
-	int	file_2;
+	int	output_file;
 
 	close(fd[1]);
-	file_2 = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
-	if (file_2 == -1)
+	output_file = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	if (output_file == -1)
 	{
 		perror("error opening\n");
 		exit(EXIT_FAILURE);
 	}
-	if(dup2(file_2, 1) == -1) // file opened will be input/read
+	if(dup2(output_file, 1) == -1) // file opened will be output/write
 	{
 		perror("error duplicating file descriptor\n");
 		exit(EXIT_FAILURE);
 	}
-	if (dup2(fd[0], 0) == -1) // fd[1] will be write/output
+	if (dup2(fd[0], 0) == -1) // fd[0] will be read/input
 	{
 		perror("error duplicating file descriptor\n");
 		exit(EXIT_FAILURE);
 	}
-	ft_exec(argv[2], envp);
+	ft_exec(argv[3], envp);
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -130,9 +149,15 @@ int	main(int argc, char **argv, char **envp)
 		}
 		if (pid == 0)
 			child_process(fd, argv, envp);
-		waitpid(pid, NULL, 0);
-		parent_process(fd, argv, envp);
+//		else
+//		{
+//			waitpid(pid, NULL, 0);
+			parent_process(fd, argv, envp);
+//		}
 	}
 	else
+	{
 		ft_putstr_fd("wrong input", STDERR_FILENO);
+		exit(EXIT_FAILURE);
+	}
 }
