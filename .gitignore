@@ -7,6 +7,8 @@ tests
 *.txt
 pipex-tester
 pipex_tester_42
+42_pipex_tester
+PIPEXaminator
 
 # Object files
 *.o

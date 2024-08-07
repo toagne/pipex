@@ -3,14 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mpellegr <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mpellegr <mpellegr@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/08/05 11:19:44 by mpellegr          #+#    #+#             */
-/*   Updated: 2024/08/06 16:27:13 by mpellegr         ###   ########.fr       */
+/*   Created: 2024/08/07 11:16:11 by mpellegr          #+#    #+#             */
+/*   Updated: 2024/08/07 16:44:59 by mpellegr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
+
+void	ft_free(char **arr)
+{
+	size_t	i;
+
+	i = 0;
+	while (arr[i])
+	{
+		free(arr[i]);
+		i++;
+	}
+	free(arr);
+}
 
 char	*find_path(char *cmd, char **envp)
 {
@@ -23,25 +36,23 @@ char	*find_path(char *cmd, char **envp)
 	while (ft_strnstr(envp[i], "PATH", 4) == 0)
 		i++;
 	paths = ft_split(envp[i] + 5, ':');
-	if (!paths)
-	{
-		perror("split error\n");
-		exit(EXIT_FAILURE);
-	}
 	i = 0;
 	while (paths[i])
 	{
 		temp_path = ft_strjoin(paths[i], "/");
 		path = ft_strjoin(temp_path, cmd);
 		free(temp_path);
+		if (!path)
+		{
+			ft_free(paths);
+			return (NULL);
+		}
 		if (access(path, F_OK) == 0)
 			return (path);
 		free(path);
 		i++;
 	}
-	while (i--)
-		free(paths[i]);
-	free(paths);
+	ft_free(paths);
 	return (NULL);
 }
 
@@ -49,36 +60,21 @@ void	ft_exec(char *cmd, char **envp)
 {
 	char	**cmd_arr;
 	char	*path;
-	int		i;
 
-	i = -1;
 	cmd_arr = ft_split(cmd, ' ');
-	if (!cmd_arr)
-	{
-		perror("split error\n");
-		exit(EXIT_FAILURE);	
-	}
 	path = find_path(cmd_arr[0], envp);
 	if (!path)
 	{
-		while (cmd_arr[++i])
-			free(cmd_arr[i]);
-		free(cmd_arr);
-		exit(EXIT_FAILURE);
+		perror("command not found\n");
+		ft_free(cmd_arr);
+		exit(127);
 	}
 	if (execve(path, cmd_arr, envp) == -1)
 	{
-		while (cmd_arr[++i])
-			free(cmd_arr[i]);
-		free(cmd_arr);
-		free(path);
-		perror("execve failure\n");
+		//perror("command not found: cmd_arr[0]");
+		ft_free(cmd_arr);
 		exit(EXIT_FAILURE);
 	}
-	free(path);
-	while (cmd_arr[++i])
-		free(cmd_arr[i]);
-	free(cmd_arr);
 }
 
 void	child_process(int *fd, char **argv, char **envp)
@@ -149,11 +145,9 @@ int	main(int argc, char **argv, char **envp)
 		}
 		if (pid == 0)
 			child_process(fd, argv, envp);
-//		else
-//		{
-//			waitpid(pid, NULL, 0);
-			parent_process(fd, argv, envp);
-//		}
+		if (ft_strncmp(argv[2], "sleep", 5) == 0)
+			waitpid(0, NULL, 0);
+		parent_process(fd, argv, envp);
 	}
 	else
 	{
