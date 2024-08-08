@@ -9,6 +9,7 @@ pipex-tester
 pipex_tester_42
 42_pipex_tester
 PIPEXaminator
+pipexTester
 
 # Object files
 *.o

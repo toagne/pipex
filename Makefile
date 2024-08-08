@@ -6,11 +6,11 @@
 #    By: mpellegr <mpellegr@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/22 09:17:47 by mpellegr          #+#    #+#              #
-#    Updated: 2024/08/05 15:19:59 by mpellegr         ###   ########.fr        #
+#    Updated: 2024/08/08 16:25:11 by mpellegr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-SOURCES = main.c
+SOURCES = main.c utils.c
 
 #BONUS_SOURCES = check_errors.c bonus_push.c bonus_rev_rotate.c \
 		bonus_rotate.c bonus_swap.c get_next_line.c  \
