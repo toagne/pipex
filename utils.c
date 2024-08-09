@@ -6,7 +6,7 @@
 /*   By: mpellegr <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 16:22:17 by mpellegr          #+#    #+#             */
-/*   Updated: 2024/08/08 16:45:35 by mpellegr         ###   ########.fr       */
+/*   Updated: 2024/08/09 14:31:25 by mpellegr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ static char	*find_path(char *cmd, char **envp)
 	return (cmd);
 }
 
-void	ft_exec(char *cmd, char **envp)
+void	ft_exec(char *cmd, char **envp, char **argv)
 {
 	char	**cmd_arr;
 	char	*path;
@@ -68,7 +68,11 @@ void	ft_exec(char *cmd, char **envp)
 	path = find_path(cmd_arr[0], envp);
 	if (!path)
 	{
-		perror("command not found\n");
+		write(2, argv[0], ft_strlen(argv[0]));
+		write(2, ": ", 2);
+		//write(2, argv[1], ft_strlen(argv[1]));
+		//write(2, ": ", 2);
+		write(2, ": command not found\n", 20);
 		ft_free(cmd_arr);
 		exit(127);
 	}
@@ -79,12 +83,16 @@ void	ft_exec(char *cmd, char **envp)
 			if (ft_strncmp(path, cmd, ft_strlen(cmd)))
 				free(path);
 			ft_free(cmd_arr);
-			perror("not access");
+			write(2, "/pipex/", 7);
+			write(2,  cmd, ft_strlen(cmd));
+			perror("");
 			exit(126);
 		}
-		ft_putstr_fd("command not found: ", 2);
-		ft_putstr_fd(cmd_arr[0], 2);
-		perror("\n");
+		write(2, argv[0], ft_strlen(argv[0]));
+		write(2, ": ", 2);
+		write(2, cmd, ft_strlen(cmd));
+		write(2, ": ", 2);
+		perror("");
 		if (ft_strncmp(path, cmd, ft_strlen(cmd)))
 			free(path);
 		ft_free(cmd_arr);
