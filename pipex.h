@@ -6,7 +6,7 @@
 /*   By: mpellegr <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/05 11:22:08 by mpellegr          #+#    #+#             */
-/*   Updated: 2024/08/09 11:18:10 by mpellegr         ###   ########.fr       */
+/*   Updated: 2024/08/15 16:40:33 by mpellegr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,22 @@
 # include <fcntl.h>
 # include <sys/wait.h>
 
-void	ft_exec(char *cmd, char **envp, char **argv);
+void	ft_exec(char *cmd, char **envp, char c);
 
-# endif
+void	first_check(int argc, char **argv, char **envp, int *fd_input_file);
+void	error_fork_1(pid_t pid_1, int *fd_pipe, int *fd_input_file);
+
+void	last_process(char *cmd, char **envp, char *output_file, int fd_in_file);
+
+void	ft_free(char **arr);
+void	return_status(int pid);
+
+void	open_input_file(char *input_file, int *fd_input_file);
+void	open_output_file(char *output_file, int *fd_output_file);
+
+void	error_no_file(char *file);
+void	error_no_permission(char *str);
+void	error_command_not_found(char *cmd);
+void	error_is_a_directory(char *str);
+
+#endif

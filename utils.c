@@ -6,13 +6,14 @@
 /*   By: mpellegr <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/08 16:22:17 by mpellegr          #+#    #+#             */
-/*   Updated: 2024/08/09 14:31:25 by mpellegr         ###   ########.fr       */
+/*   Updated: 2024/08/15 16:02:31 by mpellegr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
+#include <string.h>
 
-static void	ft_free(char **arr)
+void	ft_free(char **arr)
 {
 	size_t	i;
 
@@ -25,79 +26,22 @@ static void	ft_free(char **arr)
 	free(arr);
 }
 
-static char	*find_path(char *cmd, char **envp)
+void	return_status(int pid)
 {
-	int		i;
-	char	**paths;
-	char	*temp_path;
-	char	*path;
+	int	status;
 
-	i = 0;
-	while (ft_strnstr(envp[i], "PATH", 4) == 0)
-		i++;
-	paths = ft_split(envp[i] + 5, ':');
-	i = 0;
-	while (paths[i])
+	if (waitpid(pid, &status, 0) == -1)
 	{
-		temp_path = ft_strjoin(paths[i], "/");
-		path = ft_strjoin(temp_path, cmd);
-		free(temp_path);
-		if (!path)
-		{
-			ft_free(paths);
-			return (NULL);
-		}
-		if (access(path, F_OK) == 0)
-		{
-			ft_free(paths);
-			return (path);
-		}
-		free(path);
-		i++;
+		perror("waitpid failed for child 2");
+		exit(EXIT_FAILURE);
 	}
-	ft_free(paths);
-	return (cmd);
-}
-
-void	ft_exec(char *cmd, char **envp, char **argv)
-{
-	char	**cmd_arr;
-	char	*path;
-
-	cmd_arr = ft_split(cmd, ' ');
-	path = find_path(cmd_arr[0], envp);
-	if (!path)
+	if (WIFSIGNALED(status))
 	{
-		write(2, argv[0], ft_strlen(argv[0]));
-		write(2, ": ", 2);
-		//write(2, argv[1], ft_strlen(argv[1]));
-		//write(2, ": ", 2);
-		write(2, ": command not found\n", 20);
-		ft_free(cmd_arr);
-		exit(127);
+		write(2, "Segmentation fault in child 2\n", 30);
+		exit(128 + WTERMSIG(status));
 	}
-	if (execve(path, cmd_arr, envp) == -1)
+	if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 	{
-		if (access(path, X_OK) != 0 && access(path, F_OK) == 0)
-		{
-			if (ft_strncmp(path, cmd, ft_strlen(cmd)))
-				free(path);
-			ft_free(cmd_arr);
-			write(2, "/pipex/", 7);
-			write(2,  cmd, ft_strlen(cmd));
-			perror("");
-			exit(126);
-		}
-		write(2, argv[0], ft_strlen(argv[0]));
-		write(2, ": ", 2);
-		write(2, cmd, ft_strlen(cmd));
-		write(2, ": ", 2);
-		perror("");
-		if (ft_strncmp(path, cmd, ft_strlen(cmd)))
-			free(path);
-		ft_free(cmd_arr);
-		exit(127);
+		exit(WEXITSTATUS(status));
 	}
-	free(path);
-	ft_free(cmd_arr);
 }
