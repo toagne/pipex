@@ -6,11 +6,12 @@
 #    By: mpellegr <mpellegr@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/22 09:17:47 by mpellegr          #+#    #+#              #
-#    Updated: 2024/08/15 15:47:47 by mpellegr         ###   ########.fr        #
+#    Updated: 2024/08/16 14:41:53 by mpellegr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-SOURCES = main.c utils.c error_check.c open.c print_errors.c command_execution.c
+SOURCES = main.c utils.c error_check.c open.c print_errors.c parse_cmd.c create_path.c \
+		  pids.c
 
 #SOURCES = parsing_ok.c
 
