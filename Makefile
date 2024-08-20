@@ -6,30 +6,22 @@
 #    By: mpellegr <mpellegr@student.hive.fi>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/22 09:17:47 by mpellegr          #+#    #+#              #
-#    Updated: 2024/08/16 14:41:53 by mpellegr         ###   ########.fr        #
+#    Updated: 2024/08/20 14:08:35 by mpellegr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 SOURCES = main.c utils.c error_check.c open.c print_errors.c parse_cmd.c create_path.c \
 		  pids.c
 
-#SOURCES = parsing_ok.c
-
-#BONUS_SOURCES = check_errors.c bonus_push.c bonus_rev_rotate.c \
-		bonus_rotate.c bonus_swap.c get_next_line.c  \
-		get_next_line_utils.c main_bonus.c t_ps_list.c utils.c \
-
 OBJECTS = $(SOURCES:.c=.o)
 
-#BONUS_OBJECTS = $(BONUS_SOURCES:.c=.o)
+BONUS_SOURCES = main_bonus.c utils.c error_check_bonus.c open.c print_errors.c parse_cmd.c \
+				create_path.c pids.c here_doc.c get_next_line/get_next_line.c \
+				get_next_line/get_next_line_utils.c
+
+BONUS_OBJECTS = $(BONUS_SOURCES:.c=.o)
 
 NAME = pipex
-
-#BONUS_NAME = checker
-
-LIB = push_swap.a
-
-#BONUS_LIB = checker.a
 
 CC = gcc
 
@@ -39,43 +31,30 @@ AR = ar rcs
 
 RM = rm -f
 
-LIBFT = libft
+LIBFT = ./libft
 
 all: $(NAME)
 
-$(NAME) : $(LIB)
-	$(CC) -g $< -o $@
+$(NAME) : $(OBJECTS)
+	@make -C $(LIBFT)
+	$(CC) $(CFLAGS) $(OBJECTS) libft/libft.a -o $(NAME)
 
-$(LIB): $(OBJECTS)
-	make -C $(LIBFT)
-	cp libft/libft.a .
-	mv libft.a $(LIB)
-	$(AR) $(LIB) $(OBJECTS)
+.bonus: $(BONUS_OBJECTS)
+	@make -C $(LIBFT)
+	$(CC) $(CFLAGS) $(BONUS_OBJECTS) libft/libft.a -o $(NAME)
+	@touch .bonus;
 
-#$(BONUS_LIB): $(BONUS_OBJECTS)
-#	make -C $(LIBFT)
-#	cp libft/libft.a .
-#	mv libft.a $(BONUS_LIB)
-#	$(AR) $(BONUS_LIB) $(BONUS_OBJECTS)
-
-#.bonus: $(BONUS_LIB)
-#	$(CC) -g $< -o $(BONUS_NAME)
-#	@touch .bonus;
-
-#bonus: .bonus
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+bonus: .bonus
 
 clean:
-	make -C ./libft clean
-	$(RM) $(OBJECTS) $(LIB) $(BONUS_OBJECTS) $(BONUS_LIB)
+	@make -C ./libft clean
+	$(RM) $(OBJECTS) $(BONUS_OBJECTS)
 	@$(RM) .bonus
 
 fclean: clean
-	make -C ./libft fclean
-	$(RM) $(NAME) $(BONUS_NAME)
+	@make -C ./libft fclean
+	$(RM) $(NAME)
 
 re: fclean all
 
-PHONY: all clean fclean re
+.PHONY: all clean fclean re

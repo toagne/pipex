@@ -6,7 +6,7 @@
 /*   By: mpellegr <mpellegr@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 14:34:21 by mpellegr          #+#    #+#             */
-/*   Updated: 2024/08/16 15:00:48 by mpellegr         ###   ########.fr       */
+/*   Updated: 2024/08/20 14:07:49 by mpellegr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void	child_process(int fd_in_file, int fd_out_pipe, char *cmd, char **envp)
 	ft_exec(cmd, envp, 'c');
 }
 
-static void	last_child(int fd_in_file, int fd_out_pipe, char *cmd, char **envp)
+void	last_child(int fd_in_file, int fd_out_pipe, char *cmd, char **envp)
 {
 	if (dup2(fd_in_file, 0) == -1)
 	{
@@ -66,7 +66,7 @@ void	last_process(char *cmd, char **envp, char *output_file, int fd_in_file)
 	int	fd_output_file;
 	int	pid_2;
 
-	open_output_file(output_file, &fd_output_file);
+	open_output_file(output_file, &fd_output_file, 'n');
 	pid_2 = fork();
 	if (pid_2 == -1)
 	{
@@ -77,5 +77,7 @@ void	last_process(char *cmd, char **envp, char *output_file, int fd_in_file)
 	}
 	if (pid_2 == 0)
 		last_child(fd_in_file, fd_output_file, cmd, envp);
+	close(fd_in_file);
+	close(fd_output_file);
 	return_status(pid_2);
 }

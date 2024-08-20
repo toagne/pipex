@@ -6,7 +6,7 @@
 /*   By: mpellegr <mpellegr@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/16 09:53:43 by mpellegr          #+#    #+#             */
-/*   Updated: 2024/08/16 15:10:34 by mpellegr         ###   ########.fr       */
+/*   Updated: 2024/08/19 14:00:37 by mpellegr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,12 @@ static void	path_not_found(char **env_paths, char **cmd)
 	ft_free(env_paths);
 	if (*cmd[0] == '/')
 		error_no_file(*cmd);
+	else if (access(*cmd, F_OK) == 0 && access(*cmd, X_OK) != 0)
+	{
+		error_no_permission(*cmd);
+		ft_free(cmd);
+		exit(126);
+	}
 	else
 		error_command_not_found(*cmd);
 	ft_free(cmd);
